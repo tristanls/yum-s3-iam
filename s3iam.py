@@ -228,22 +228,8 @@ class S3Grabber(object):
         """
         date = time.strftime("%a, %d %b %Y %H:%M:%S GMT", timeval or time.gmtime())
         request.add_header('Date', date)
-        host = request.get_host()
-
-        # TODO: bucket name finding is ugly, I should find a way to support
-        # both naming conventions: http://bucket.s3.amazonaws.com/ and
-        # http://s3.amazonaws.com/bucket/
-        try:
-            pos = host.find(".s3")
-            assert pos != -1
-            bucket = host[:pos]
-        except AssertionError:
-            raise yum.plugins.PluginYumExit(
-                "s3iam: baseurl hostname should be in format: "
-                "'<bucket>.s3<aws-region>.amazonaws.com'; "
-                "found '%s'" % host)
-
-        resource = "/%s%s" % (bucket, request.get_selector(), )
+        resource = request.get_selector()
+        # print resource
         if self.token:
             amz_headers = 'x-amz-security-token:%s\n' % self.token
         else:
@@ -260,3 +246,4 @@ class S3Grabber(object):
             hashlib.sha1).digest()
         signature = digest.encode('base64')
         return signature.strip()
+        
